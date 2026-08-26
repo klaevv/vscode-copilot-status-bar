@@ -1,0 +1,54 @@
+{
+  "name": "vscode-copilot-status-bar",
+  "displayName": "Copilot Status Bar",
+  "description": "Show GitHub Copilot premium request quota in the VS Code status bar.",
+  "version": "0.1.0",
+  "publisher": "klaevv",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/klaevv/vscode-copilot-status-bar.git"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["Other"],
+  "main": "./out/extension.js",
+  "activationEvents": ["onStartupFinished"],
+  "contributes": {
+    "commands": [
+      { "command": "copilotStatusBar.refresh", "title": "Copilot Status Bar: Refresh" },
+      { "command": "copilotStatusBar.showUsage", "title": "Copilot Status Bar: Show Usage" },
+      { "command": "copilotStatusBar.signIn", "title": "Copilot Status Bar: Sign In to GitHub" },
+      { "command": "copilotStatusBar.showLog", "title": "Copilot Status Bar: Show Log" },
+      { "command": "copilotStatusBar.setRefreshInterval", "title": "Copilot Status Bar: Set Refresh Interval" }
+    ],
+    "configuration": {
+      "title": "Copilot Status Bar",
+      "properties": {
+        "copilotStatusBar.refreshIntervalSeconds": {
+          "type": "number",
+          "default": 300,
+          "minimum": 60,
+          "description": "How often to re-fetch Copilot quota from GitHub, in seconds."
+        },
+        "copilotStatusBar.countdownUpdateIntervalSeconds": {
+          "type": "number",
+          "default": 60,
+          "minimum": 15,
+          "description": "How often to refresh the status bar's 'resets in' countdown between quota fetches, in seconds. Does not make a network request."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "vscode:prepublish": "npm run compile"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.4.0"
+  }
+}
