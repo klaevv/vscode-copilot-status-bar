@@ -3,17 +3,44 @@
   "displayName": "Copilot Status Bar",
   "description": "Show GitHub Copilot premium request quota in the VS Code status bar.",
   "version": "0.1.0",
-  "publisher": "klaevv",
+  "publisher": "Appforge",
   "license": "MIT",
+  "icon": "media/icon.png",
+  "galleryBanner": {
+    "color": "#07113f",
+    "theme": "dark"
+  },
+  "pricing": "Free",
   "repository": {
     "type": "git",
     "url": "https://github.com/klaevv/vscode-copilot-status-bar.git"
   },
+  "homepage": "https://github.com/klaevv/vscode-copilot-status-bar#readme",
+  "bugs": {
+    "url": "https://github.com/klaevv/vscode-copilot-status-bar/issues"
+  },
   "engines": {
     "vscode": "^1.85.0"
   },
-  "categories": ["Other"],
+  "categories": ["Visualization", "Other"],
+  "keywords": [
+    "copilot",
+    "github copilot",
+    "premium requests",
+    "quota",
+    "usage",
+    "status bar"
+  ],
   "main": "./out/extension.js",
+  "extensionKind": ["ui"],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": true
+    },
+    "virtualWorkspaces": {
+      "supported": true
+    }
+  },
   "activationEvents": ["onStartupFinished"],
   "contributes": {
     "commands": [
@@ -44,11 +71,15 @@
   "scripts": {
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
-    "vscode:prepublish": "npm run compile"
+    "check": "npm run compile",
+    "vscode:prepublish": "npm run compile",
+    "package": "vsce package",
+    "publish:marketplace": "vsce publish"
   },
   "devDependencies": {
     "@types/node": "^20.11.0",
     "@types/vscode": "^1.85.0",
+    "@vscode/vsce": "^3.9.2",
     "typescript": "^5.4.0"
   }
 }

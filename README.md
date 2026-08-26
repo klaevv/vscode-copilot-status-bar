@@ -1,15 +1,26 @@
 # Copilot Status Bar
 
-A minimal VS Code extension that shows your GitHub Copilot premium request
-quota in the status bar.
+A focused VS Code extension that keeps your GitHub Copilot premium-request
+quota and reset countdown visible in the status bar.
 
 ## Features
 
-- Shows premium/chat request quota used and time until reset.
-- Click the status bar item for a quick-pick summary.
-- Warns (yellow) at 75% used and errors (red) at 90% used.
-- Uses your existing GitHub sign-in — no separate login required if you're
-  already signed in to Copilot in VS Code.
+- See the percentage of premium requests used and the time until reset.
+- Click the status bar item for plan, quota, reset, and last-updated details.
+- Get a yellow warning at 75% used and a red warning at 90% used.
+- Keep the countdown current without making extra network requests.
+- Reuse your existing VS Code GitHub sign-in, with an explicit sign-in command
+  available when needed.
+
+## Getting started
+
+1. Install **Copilot Status Bar** from the VS Code Marketplace.
+2. Make sure the GitHub account with your Copilot subscription is signed in to
+   VS Code.
+3. The quota appears in the left side of the status bar after startup.
+
+If the status bar says **Sign in**, click it or run **Copilot Status Bar: Sign
+In to GitHub** from the Command Palette.
 
 ## How it works — please read
 
@@ -36,6 +47,7 @@ anywhere except `api.github.com`. No telemetry.
 | Setting | Default | Description |
 | --- | --- | --- |
 | `copilotStatusBar.refreshIntervalSeconds` | `300` | How often to re-fetch Copilot quota from GitHub. |
+| `copilotStatusBar.countdownUpdateIntervalSeconds` | `60` | How often to update the local reset countdown without making a network request. |
 
 ## Commands
 
@@ -44,15 +56,42 @@ anywhere except `api.github.com`. No telemetry.
 | **Copilot Status Bar: Refresh** | Re-fetch and update the status bar. |
 | **Copilot Status Bar: Show Usage** | Show the usage summary quick-pick. |
 | **Copilot Status Bar: Sign In to GitHub** | Prompt a GitHub sign-in if needed. |
+| **Copilot Status Bar: Show Log** | Open diagnostic output for the latest refresh failures. |
+| **Copilot Status Bar: Set Refresh Interval** | Choose how often quota data is fetched. |
+
+## Privacy and security
+
+- Authentication is handled by VS Code's built-in GitHub authentication
+  provider with the `user:email` scope.
+- Access tokens are held in memory only and are never written to disk.
+- Requests are sent only to `https://api.github.com`.
+- The extension collects no analytics or telemetry.
+
+## Troubleshooting
+
+- **Sign in is shown:** run **Copilot Status Bar: Sign In to GitHub** and choose
+  the GitHub account that has Copilot access.
+- **Copilot — is shown:** run **Copilot Status Bar: Show Log** for the response
+  status, then try **Copilot Status Bar: Refresh**.
+- **Values are marked stale:** the last successful value is being kept visible
+  because a refresh failed. Check the log and your network connection.
+
+For bugs and support requests, use the [GitHub issue tracker](https://github.com/klaevv/vscode-copilot-status-bar/issues).
 
 ## Development
 
 ```sh
-npm install
-npm run compile
+npm ci
+npm run check
 ```
 
 Press `F5` to launch an Extension Development Host.
+
+To create an installable Marketplace package:
+
+```sh
+npm run package
+```
 
 ## Limitations
 
