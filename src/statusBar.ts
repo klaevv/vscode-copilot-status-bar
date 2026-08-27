@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import { formatResetDate, percentUsed, resetText } from "./quotaFormatting";
 import { QuotaSnapshot } from "./types";
 
 const STATUS_BAR_PRIORITY = 100;
@@ -9,42 +10,6 @@ export type QuotaViewState =
   | { kind: "signedOut" }
   | { kind: "unavailable" }
   | { kind: "ok"; snapshot: QuotaSnapshot; stale: boolean };
-
-function percentUsed(percentRemaining: number): number {
-  if (!Number.isFinite(percentRemaining)) return 0;
-  return Math.round(Math.min(100, Math.max(0, 100 - percentRemaining)));
-}
-
-function formatDuration(totalSeconds: number): string {
-  if (!Number.isFinite(totalSeconds) || totalSeconds <= 0) return "0m";
-  const days = Math.floor(totalSeconds / 86400);
-  const hours = Math.floor((totalSeconds % 86400) / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  if (days > 0) return `${days}d ${hours}h`;
-  if (hours > 0) return `${hours}h ${minutes}m`;
-  return `${minutes}m`;
-}
-
-function resetText(resetDate: Date | null, resetDateHasTime: boolean): string {
-  if (!resetDate || !Number.isFinite(resetDate.getTime())) return "unknown";
-  if (!resetDateHasTime) {
-    // Date-only value: round up to the end of that UTC day so the countdown doesn't
-    // undercount by showing a fabricated (and often misleading) time-of-day.
-    const endOfDayUtc = Date.UTC(
-      resetDate.getUTCFullYear(),
-      resetDate.getUTCMonth(),
-      resetDate.getUTCDate() + 1,
-    );
-    return formatDuration(Math.max(0, Math.floor((endOfDayUtc - Date.now()) / 1000)));
-  }
-  const seconds = Math.max(0, Math.floor((resetDate.getTime() - Date.now()) / 1000));
-  return formatDuration(seconds);
-}
-
-// Date-only values carry no real time-of-day, so show just the date to avoid implying precision that isn't there.
-function formatResetDate(resetDate: Date, resetDateHasTime: boolean): string {
-  return resetDateHasTime ? resetDate.toLocaleString() : resetDate.toLocaleDateString(undefined, { timeZone: "UTC" });
-}
 
 export class StatusBar {
   private item: vscode.StatusBarItem;

@@ -1,8 +1,8 @@
 {
   "name": "vscode-copilot-status-bar",
   "displayName": "Copilot Status Bar",
-  "description": "Show GitHub Copilot premium request quota in the VS Code status bar.",
-  "version": "0.1.0",
+  "description": "Lightweight Copilot token usage meter in the VSCode status bar.",
+  "version": "1.0.0",
   "publisher": "Appforge",
   "license": "MIT",
   "icon": "media/icon.png",
@@ -71,7 +71,9 @@
   "scripts": {
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
-    "check": "npm run compile",
+    "pretest": "npm run compile",
+    "test": "node --test",
+    "check": "npm test",
     "vscode:prepublish": "npm run compile",
     "package": "vsce package",
     "publish:marketplace": "vsce publish"
