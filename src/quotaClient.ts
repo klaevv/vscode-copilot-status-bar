@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import { parseCopilotUserResponse } from "./quotaParser";
 import { QuotaSnapshot } from "./types";
 
 const GITHUB_AUTH_PROVIDER_ID = "github";
@@ -23,25 +24,6 @@ async function safeBodySnippet(res: Response): Promise<string> {
   }
 }
 
-interface QuotaSnapshotField {
-  entitlement: number;
-  unlimited: boolean;
-  overage_count: number;
-  overage_permitted: boolean;
-  percent_remaining: number;
-}
-
-interface CopilotUserResponse {
-  copilot_plan?: string;
-  // Date-only (no time-of-day); prefer quota_reset_date_utc when present.
-  quota_reset_date?: string;
-  quota_reset_date_utc?: string;
-  quota_snapshots?: {
-    premium_interactions?: QuotaSnapshotField;
-    chat?: QuotaSnapshotField;
-  };
-}
-
 async function fetchQuotaSnapshot(githubAccessToken: string): Promise<QuotaSnapshot> {
   const res = await fetch(QUOTA_URL, {
     headers: {
@@ -53,24 +35,7 @@ async function fetchQuotaSnapshot(githubAccessToken: string): Promise<QuotaSnaps
   if (!res.ok) {
     throw new Error(`Copilot quota request failed: ${res.status} ${await safeBodySnippet(res)}`);
   }
-  const body = (await res.json()) as CopilotUserResponse;
-  // Free plans only report a "chat" window; paid plans report "premium_interactions".
-  const field = body.quota_snapshots?.premium_interactions ?? body.quota_snapshots?.chat;
-  if (!field) {
-    throw new Error("Copilot quota response had no recognizable quota snapshot");
-  }
-  const resetDateRaw = body.quota_reset_date_utc ?? body.quota_reset_date;
-  return {
-    planName: body.copilot_plan ?? "unknown",
-    entitlement: field.entitlement,
-    unlimited: field.unlimited,
-    percentRemaining: field.percent_remaining,
-    overageEnabled: field.overage_permitted,
-    overageUsed: field.overage_count,
-    resetDate: resetDateRaw ? new Date(resetDateRaw) : null,
-    resetDateHasTime: typeof body.quota_reset_date_utc === "string",
-    capturedAt: new Date(),
-  };
+  return parseCopilotUserResponse(await res.json());
 }
 
 // Returns null only when signed out; throws on transient fetch failures so
