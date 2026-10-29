@@ -8,6 +8,17 @@
       "args": ["--extensionDevelopmentPath=${workspaceFolder}"],
       "outFiles": ["${workspaceFolder}/out/**/*.js"],
       "preLaunchTask": "${defaultBuildTask}"
-    }
+    },{
+    "name": "Debug Current Test",
+    "type": "node",
+    "request": "launch",
+    "preLaunchTask": "${defaultBuildTask}",
+    "program": "${workspaceFolder}/test/quotaParser.test.cjs",
+    "cwd": "${workspaceFolder}",
+    "console": "integratedTerminal",
+    "skipFiles": [
+        "<node_internals>/**"
+    ]
+}
   ]
 }

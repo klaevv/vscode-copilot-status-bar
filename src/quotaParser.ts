@@ -1,5 +1,5 @@
 import { QuotaSnapshot } from "./types";
-
+import { Helpers } from "./helpers";
 type JsonObject = Record<string, unknown>;
 
 function isObject(value: unknown): value is JsonObject {
@@ -8,12 +8,36 @@ function isObject(value: unknown): value is JsonObject {
 
 function requiredNumber(source: JsonObject, key: string): number {
   const value = source[key];
-  if (typeof value !== "number" || !Number.isFinite(value)) {
-    throw new Error(`Copilot quota response had an invalid ${key}`);
+  if (value === undefined || value === null) {
+    throw new Error(`Copilot quota response did not contain data for ${key}`);
   }
-  return value;
+  const parsedValue= Helpers.tryParseNumber(value)
+  if (!parsedValue.success || !parsedValue.valueIsFinite) {
+    throw new Error(`Copilot quota response value for ${key} was not a valid number! Received: '${value}'`);
+  }
+  return Helpers.roundTo(parsedValue.value);
 }
 
+/**
+ * Attempts to parse an optional number from the given source object.
+ * Returns the number if it exists and is finite, otherwise returns the default value if provided, or undefined.
+ */
+function optionalNumber(
+  source: JsonObject,
+  key: string,
+  defaultValue: number | null | undefined = undefined
+) : number | undefined | null {
+  try {
+    const value = source[key];
+    if (typeof value === "number" && Number.isFinite(value)) {
+      
+      return Helpers.roundTo(value);
+    }
+  } catch {
+    // ignore errors and return undefined
+  }
+  return defaultValue;
+}
 function requiredBoolean(source: JsonObject, key: string): boolean {
   const value = source[key];
   if (typeof value !== "boolean") {
@@ -51,16 +75,30 @@ export function parseCopilotUserResponse(
   const parsedResetDate = resetDateRaw ? new Date(resetDateRaw) : null;
   const resetDate =
     parsedResetDate && Number.isFinite(parsedResetDate.getTime()) ? parsedResetDate : null;
+  let rv: QuotaSnapshot =
+    {
+      planName: optionalNonEmptyString(value.copilot_plan) ?? "unknown",
+      quotaTotal: requiredNumber(field, "entitlement"),
+      unlimited: requiredBoolean(field, "unlimited"),
+      quotaUsed: optionalNumber(field, "credits_used"),
+      quotaRemaining: optionalNumber(field, "quota_remaining"),
+      percentUsed: null,
+      percentageFactor: null,
+      percentRemaining: requiredNumber(field, "percent_remaining"),
+      overageEnabled: requiredBoolean(field, "overage_permitted"),
+      overageUsed: requiredNumber(field, "overage_count"),
+      resetDate: resetDate,
+      resetDateHasTime: resetDate !== null && resetDateUtc !== undefined,
+      capturedAt: capturedAt
+    } as QuotaSnapshot;
 
-  return {
-    planName: optionalNonEmptyString(value.copilot_plan) ?? "unknown",
-    entitlement: requiredNumber(field, "entitlement"),
-    unlimited: requiredBoolean(field, "unlimited"),
-    percentRemaining: requiredNumber(field, "percent_remaining"),
-    overageEnabled: requiredBoolean(field, "overage_permitted"),
-    overageUsed: requiredNumber(field, "overage_count"),
-    resetDate,
-    resetDateHasTime: resetDate !== null && resetDateUtc !== undefined,
-    capturedAt,
-  };
+  rv.percentUsed = Helpers.roundTo(100 - (rv.percentRemaining ?? 0));
+  
+  rv.percentageFactor = Helpers.roundTo(((
+    rv.quotaTotal !== null && 
+    rv.quotaTotal !== undefined && 
+    rv.quotaTotal !== 0
+  ) ? 100 / rv.quotaTotal : 0),5);
+
+  return rv;
 }

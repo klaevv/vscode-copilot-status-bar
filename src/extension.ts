@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import { readLatestQuota, signIn } from "./quotaClient";
 import { createUsageQuickPickItems, StatusBar } from "./statusBar";
 import { QuotaSnapshot } from "./types";
+import { ConfigurationHelper } from "./helpers";
 
 let timer: NodeJS.Timeout | undefined;
 let countdownTimer: NodeJS.Timeout | undefined;
@@ -119,6 +120,10 @@ async function setRefreshInterval() {
 }
 
 export function activate(context: vscode.ExtensionContext) {
+  // needs to be one of the first things initialized to ensure configuration is available
+  ConfigurationHelper.init(context);
+  
+  
   statusBar = new StatusBar();
   context.subscriptions.push(statusBar, output);
 

@@ -64,6 +64,19 @@
           "default": 60,
           "minimum": 15,
           "description": "How often to refresh the status bar's 'resets in' countdown between quota fetches, in seconds. Does not make a network request."
+        },
+        "copilotStatusBar.DisplayMode": {
+          "type": "string",
+          "enum": [
+            "Used",
+            "Remaining"
+          ],
+          "enumDescriptions": [
+            "Display the amount of Copilot usage consumed.",
+            "Display the remaining Copilot usage quota."
+          ],
+          "default": "Used",
+          "description": "Choose how Copilot usage is displayed: usage consumed or usage remaining."
         }
       }
     }

@@ -26,7 +26,7 @@ test("parses paid quota and prefers the timestamped reset date", () => {
   );
 
   assert.equal(result.planName, "business");
-  assert.equal(result.entitlement, 300);
+  assert.equal(result.quotaTotal, 300);
   assert.equal(result.percentRemaining, 42.5);
   assert.equal(result.overageEnabled, true);
   assert.equal(result.overageUsed, 2);
@@ -70,9 +70,9 @@ test("rejects missing or malformed quota data", () => {
     () =>
       parseCopilotUserResponse({
         quota_snapshots: {
-          premium_interactions: { ...paidQuota, percent_remaining: "42" },
+          premium_interactions: { ...paidQuota, percent_remaining: "NotParsableAsNumber" },
         },
       }),
-    /invalid percent_remaining/,
+    /quota response value for percent_remaining was not/,
   );
 });
